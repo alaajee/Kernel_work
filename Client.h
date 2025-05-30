@@ -1,8 +1,12 @@
-#pragma once
+#ifndef CLIENT_H// On peut utiliser l'alternative ifndef 
+#define CLIENT_H
 
 #include <linux/workqueue.h>
 #include <net/sock.h>
 
 struct workqueue_struct *client_wq;
 
-int client_handle(struct socket *client_socket);
+void client_handle(struct work_struct *work);
+
+
+#endif

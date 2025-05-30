@@ -4,13 +4,8 @@
 #include <linux/kernel.h>
 #include <net/sock.h>
 #include "SocketHandler.h"
-#include "Client.h"
-
-#define MAXPENDING 5
-
 
 int create_Serveur(void){
-
     // Creer le serveur de socket
     int serv_socket = sock_create_kern(&init_net, AF_INET, SOCK_STREAM, IPPROTO_TCP, &listen_socket);
     
@@ -33,31 +28,49 @@ int create_Serveur(void){
         sock_release(listen_socket);
         return serv_socket;
     }
-    
-    // Demander l’autorisation au système d’accepter les demandes de connexion 
+
+    // Demander l’autorisation au système d’accepter les demandes de connexion
     serv_socket = kernel_listen(listen_socket, MAXPENDING); 
     if (serv_socket < 0){
         printk("Echec listen()\n");
         sock_release(listen_socket);
         return serv_socket;
     }
-    return serv_socket;
-}
 
-int handle_Socket(struct socket *client_socket) {
-    // TODO : handle correctly the socket _ add the data to the wq ! 
-    // Soit une boucle while ou bien accept et ils sont liés ? 
-    int error = kernel_accept(&listen_socket , &client_socket , 0);
-    if (error < 0){
-        printk("Echec accept()\n");
-        sock_release(listen_socket);
-        return ret;
-    }  
-    printk("Client connecté !\n");
-    client_handle(client_socket);
+    return 0;
 }
 
 
+int handle_Socket(struct workqueue_struct *client_wq) {
+    while (!kthread_should_stop()) {
+        struct socket *new_client = NULL;
+        int error = kernel_accept(listen_socket, &new_client, 0);
+        if (error < 0) {
+            printk(KERN_ERR "Echec accept()\n");
+            continue;
+        }
+
+        printk(KERN_INFO "Client connecté !\n");
+
+        struct client_work *cw = kmalloc(sizeof(struct client_work), GFP_KERNEL);
+        if (!cw) {
+            printk(KERN_ERR "Erreur allocation tâche client\n");
+            sock_release(new_client);
+            continue;
+        }
+
+        cw->client_sock = new_client;
+
+        // cw_>work : celle ci va permettre d'executer la tache .
+        INIT_WORK(&cw->work, client_handle);
+        queue_work(client_wq, &cw->work);
+    }
+
+    return 0;
+}
+
+
+EXPORT_SYMBOL(create_Serveur); 
 MODULE_LICENSE("GPL");
 
 

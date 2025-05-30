@@ -1,5 +1,6 @@
 obj-m += main.o 
 obj-m += SocketHandler.o 
+obj-m += Client.o 
 
 PWD := $(CURDIR) 
 
