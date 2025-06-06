@@ -4,15 +4,13 @@
 
 // simple tache cpu pour commencer 
 
+int mySocket = 0;
 
-struct net_task {
-    struct work_struct work;
-    struct socket *client_sock;
-};
 
 void work_cpu(struct work_struct *cpu_work){
     // we execute it and then we add the work_net to the workqueue ( or do i initialize it , add the next_work to it?)
-    struct cpu_task *task = container_of(cpu_work, struct cpu_task, work);
+    
+    struct connection_context *task = container_of(cpu_work, struct connection_context, cpu_task);
 
     int k = 0 ;
     int i;
@@ -22,26 +20,26 @@ void work_cpu(struct work_struct *cpu_work){
 
     printk("je viens bien là");
     
-    struct net_task *nt = kmalloc(sizeof(*nt), GFP_KERNEL);
+    struct connection_context *nt = kmalloc(sizeof(*nt), GFP_KERNEL);
     if (!nt) return;
     nt->client_sock = task->client_sock;
-    INIT_WORK(&nt->work, net_cpu);
-    queue_work(task_wq, &nt->work);
+    INIT_WORK(&nt->net_task, net_cpu);
+    queue_work(task_wq, &nt->net_task);
 }
 
 void net_cpu(struct work_struct *cpu_work){
 
     // envoyer une socket !!
     // struct client_work *cw = container_of(cpu_work, struct client_work, work_c);
-   
-   struct net_task *nt = container_of(cpu_work, struct net_task, work);
+    mySocket++;
+    struct connection_context *nt = container_of(cpu_work, struct connection_context, net_task);
     if (!nt->client_sock) {
-    printk(KERN_ERR "client_sock is NULL!\n");
+        printk(KERN_ERR "client_sock is NULL!\n");
     return;
 }
     printk(KERN_INFO "nt->client_sock OK, on envoie le message\n");
     if (!nt->client_sock->sk) {
-    printk(KERN_ERR "client_sock->sk NULL\n");
+        printk(KERN_ERR "client_sock->sk NULL\n");
     return;
 }
     char *data = "ok";
@@ -52,10 +50,7 @@ void net_cpu(struct work_struct *cpu_work){
     vec.iov_base = data;
     vec.iov_len = strlen(data);
 
-    memset(&msg,0,sizeof(msg)); // nettoyer la structure 
-
-  
-
+    memset(&msg,0,sizeof(msg)); // nettoyer la structur
     int ret = kernel_sendmsg(nt->client_sock, &msg, &vec,1,vec.iov_len); // envoyer le message dans le kernel 
     printk("je finis mon send");
     if (ret < 0) {
@@ -63,14 +58,20 @@ void net_cpu(struct work_struct *cpu_work){
     }
     
 
-    INIT_WORK(&nt->work, client_handle);
+    INIT_WORK(&nt->work_c, client_handle);
     printk("eh bah wi wi ");
-    queue_work(client_wq, &nt->work);
+    queue_work(client_wq, &nt->work_c);
 
     printk(KERN_INFO "Réponse envoyée au client.\n");
-
+    
+clean:
+    printk(KERN_INFO "mySocket is %d" , mySocket);
+if (mySocket == 3){
+    kernel_sock_shutdown(nt->client_sock, SHUT_RDWR);
+    sock_release(nt->client_sock);
 }
 
+}
 EXPORT_SYMBOL(work_cpu);
 EXPORT_SYMBOL(net_cpu);
 MODULE_LICENSE("GPL");

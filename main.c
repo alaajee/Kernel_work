@@ -22,6 +22,9 @@ MODULE_DESCRIPTION("Simple traitement des socket");
 struct workqueue_struct *client_wq;
 struct workqueue_struct *task_wq;
 
+
+
+
 static int __init my_module_init(void)
 {
     // Prendre en considération les erreurs ! 
@@ -34,8 +37,8 @@ static int __init my_module_init(void)
 
 static void __exit my_module_exit(void)
 {
-   // if (listen_socket)
-    //    sock_release(listen_socket);
+   if (listen_socket)
+        sock_release(listen_socket);
     printk(KERN_INFO "Socket libéré.\n");
 }
 

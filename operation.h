@@ -5,6 +5,8 @@
 
 #define MAX_LEN 100
 
+extern int mySocket;
+
 void work_cpu(struct work_struct *cpu_work);
 void net_cpu(struct work_struct *cpu_work);
 

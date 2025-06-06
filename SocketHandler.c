@@ -64,7 +64,7 @@ int handle_Socket(void *data) {
 
         printk(KERN_INFO "Client connecté !\n");
 
-        struct client_work *cw = kmalloc(sizeof(struct client_work), GFP_KERNEL);
+        struct connection_context *cw = kmalloc(sizeof(struct client_work), GFP_KERNEL);
         if (!cw) {
             printk(KERN_ERR "Erreur allocation tâche client\n");
             sock_release(new_client);
