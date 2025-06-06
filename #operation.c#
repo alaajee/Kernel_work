@@ -1,0 +1,68 @@
+#include "operation.h"
+#include "Client.h"
+#include "treat.h"
+
+// simple tache cpu pour commencer 
+struct cpu_task {
+    struct work_struct work;
+};
+
+struct net_task {
+    struct work_struct work;
+};
+
+void work_cpu(struct work_struct *cpu_work){
+    // we execute it and then we add the work_net to the workqueue ( or do i initialize it , add the next_work to it?)
+    int k = 0 ;
+    for (int i = 0 ; i < MAX_LEN; i++ ){
+        k += 1;
+    }
+
+    struct net_task *nt = kmalloc(sizeof(*nt), GFP_KERNEL);
+    if (!nt) return;
+
+    INIT_WORK(&nt->work, net_cpu);
+    queue_work(task_wq, &nt->work);
+}
+
+void net_cpu(struct work_struct *cpu_work){
+
+    // envoyer une socket !!
+
+    char *data = "ok";
+    
+    struct msghdr msg;
+    struct kvec vec;
+
+    vec.iov_base = data;
+    vec.iov_len = strlen(data);
+
+    memset(&msg,0,sizeof(msg)); // nettoyer la structure 
+
+    msg.msg_name = NULL;
+    msg.msg_namelen = 0;
+    msg.msg_control = NULL;
+
+    msg.msg_controllen = 0;
+    msg.msg_flags = 0;
+
+    int ret = kernel_sendmsg(c_work->client_sock, &msg, &vec,1,vec.iov_len); // envoyer le message dans le kernel 
+    if (ret < 0) {
+        printk(KERN_ERR "Erreur d'envoi au client : %d\n", ret);
+    }
+
+    struct net_task *rw = kmalloc(sizeof(*rw), GFP_KERNEL);
+    if (!rw) return;
+
+    INIT_WORK(&rw->work, client_handle);
+    queue_work(client_wq, &rw->work);
+
+}
+
+EXPORT_SYMBOL(work_cpu);
+EXPORT_SYMBOL(net_cpu);
+MODULE_LICENSE("GPL");
+
+
+
+

@@ -4,9 +4,15 @@
 #include <linux/kernel.h>
 #include <net/sock.h>
 #include "SocketHandler.h"
+#include <linux/kthread.h>
+
+
+struct socket *listen_socket;
+static struct task_struct *server_thread;
 
 int create_Serveur(void){
     // Creer le serveur de socket
+
     int serv_socket = sock_create_kern(&init_net, AF_INET, SOCK_STREAM, IPPROTO_TCP, &listen_socket);
     
     if (serv_socket < 0){
@@ -16,10 +22,10 @@ int create_Serveur(void){
 
     // Preparer le port et l'adresse ip 
     struct sockaddr_in serv_addr;
-    memset(&serv_addr, 0, sizeof(serv_addr));
+    memset(&serv_addr, 0, sizeof(serv_addr)); // ADRESSE 0
     serv_addr.sin_family = AF_INET; // Format IPv4
     serv_addr.sin_addr.s_addr = htonl(INADDR_ANY); // Adresse IP
-    serv_addr.sin_port = htons(11000); // Port TCP
+    serv_addr.sin_port = htons(PORT); // Port TCP
 
     // Associer l'adresse IP+ port TCP au socket
     serv_socket = kernel_bind(listen_socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
@@ -37,11 +43,17 @@ int create_Serveur(void){
         return serv_socket;
     }
 
+    server_thread = kthread_run(handle_Socket, client_wq, "socket_server"); // un thread pour accepter les connexions 
+    if (IS_ERR(server_thread)) {
+        printk(KERN_ERR "Erreur création du thread serveur\n");
+        return PTR_ERR(server_thread);
+    }
     return 0;
 }
 
 
-int handle_Socket(struct workqueue_struct *client_wq) {
+int handle_Socket(void *data) {
+    struct workqueue_struct *client_wq = (struct workqueue_struct *)data;
     while (!kthread_should_stop()) {
         struct socket *new_client = NULL;
         int error = kernel_accept(listen_socket, &new_client, 0);
@@ -61,9 +73,11 @@ int handle_Socket(struct workqueue_struct *client_wq) {
 
         cw->client_sock = new_client;
 
-        // cw_>work : celle ci va permettre d'executer la tache .
-        INIT_WORK(&cw->work, client_handle);
-        queue_work(client_wq, &cw->work);
+        // cw->work : celle ci va permettre d'initialiser la tache.
+        INIT_WORK(&cw->work_c, client_handle);
+
+        // ceci permet d'ajouter la tache à la wq client_wq et des qu'un thread se libere elle va s'executer !! 
+        queue_work(client_wq, &cw->work_c);
     }
 
     return 0;

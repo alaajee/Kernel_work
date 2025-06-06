@@ -2,6 +2,10 @@
     "files.associations": {
         "stdlib.h": "c",
         "sockethandler.h": "c",
-        "module.h": "c"
+        "module.h": "c",
+        "client.h": "c",
+        "cstdint": "c",
+        "operation.h": "c",
+        "treat.h": "c"
     }
 }

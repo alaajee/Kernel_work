@@ -6,15 +6,19 @@
 #include "Client.h"
 
 #define MAXPENDING 5
+#define PORT 11000
 
-struct socket *listen_socket ; // une variable pour socket d'ecoute 
-struct workqueue_struct *client_wq;
+extern struct socket *listen_socket ; // une variable pour socket d'ecoute 
+extern struct workqueue_struct *client_wq;
 typedef struct client_work {
     struct socket* client_sock ;
-    struct work_struct work;
+    struct work_struct work_c;
 }client_work;
+extern struct client_work *c_work;
+
 
 int create_Serveur(void);
-int handle_Socket(struct workqueue_struct *client_wq);
+int handle_Socket(void *data);
+
 
 #endif

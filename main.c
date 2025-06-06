@@ -19,16 +19,23 @@ MODULE_DESCRIPTION("Simple traitement des socket");
    [ Réponse réseau (client) ]
 */
 
+struct workqueue_struct *client_wq;
+struct workqueue_struct *task_wq;
+
 static int __init my_module_init(void)
 {
     // Prendre en considération les erreurs ! 
+    // CHECK THE FLAG WQ_UNBOUND
+    client_wq = alloc_workqueue("clients_wq", WQ_UNBOUND, 0);
+    task_wq = alloc_workqueue("task_wq",WQ_UNBOUND , 0);
+
     return create_Serveur();
 }
 
 static void __exit my_module_exit(void)
 {
-    if (listen_socket)
-        sock_release(listen_socket);
+   // if (listen_socket)
+    //    sock_release(listen_socket);
     printk(KERN_INFO "Socket libéré.\n");
 }
 
