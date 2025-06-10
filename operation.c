@@ -18,10 +18,7 @@ void work_cpu(struct work_struct *cpu_work){
     }
 
     printk("je viens bien là");
-    
-    // struct connection_context *nt = kmalloc(sizeof(*nt), GFP_KERNEL);
-    // if (!nt) return;
-    // nt->client_sock = task->client_sock;
+
     INIT_WORK(&task->net_task, net_cpu);
     queue_work(task_wq, &task->net_task);
 }
@@ -30,7 +27,9 @@ void net_cpu(struct work_struct *cpu_work){
 
     // envoyer une socket !!
     // struct client_work *cw = container_of(cpu_work, struct client_work, work_c);
+   
     struct connection_context *nt = container_of(cpu_work, struct connection_context, net_task);
+    nt->mySocket++;
     if (!nt->client_sock) {
         printk(KERN_ERR "client_sock is NULL!\n");
         goto clean;
@@ -54,7 +53,7 @@ void net_cpu(struct work_struct *cpu_work){
     if (ret < 0) {
         printk(KERN_ERR "Erreur d'envoi au client : %d\n", ret);
     }
-    
+    printk(KERN_INFO "%d\n" , nt->mySocket);
 clean:
     if (nt->mySocket == 3){
         kernel_sock_shutdown(nt->client_sock, SHUT_RDWR);

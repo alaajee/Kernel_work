@@ -3,20 +3,13 @@
 
 
 struct client_work *c_work;
-// struct cpu_task {
-//     struct work_struct work;
-//      struct socket *client_sock;
-// };
-
-
 
 void client_handle(struct work_struct *work)
 {
-    
     struct connection_context *cw = container_of(work, struct connection_context, work_c);
     uint8_t *buf;
     int ret;
-    cw->mySocket++; // on initialise le mySocket à 1 pour savoir si on doit fermer la socket ou pas
+    
     if (!cw->client_sock){
     	printk("eeeeeeeeeeeeeeeeeeeeeeehhhhhhhhhh");
 	    goto clean;
@@ -43,10 +36,9 @@ void client_handle(struct work_struct *work)
         kfree(buf);
        	goto clean;
     }
-   
+ 
 
     INIT_WORK(&cw->cpu_task, work_cpu);
-    printk("c'est bien là");
     queue_work(task_wq, &cw->cpu_task);
 
 goto end;
