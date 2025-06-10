@@ -1,0 +1,5 @@
+0x95524e49	create_Serveur	/home/ubuntu/Kernel_work/kmodule	EXPORT_SYMBOL	
+0xf1de0b42	client_handle	/home/ubuntu/Kernel_work/kmodule	EXPORT_SYMBOL	
+0x61f77034	treat_task	/home/ubuntu/Kernel_work/kmodule	EXPORT_SYMBOL	
+0x51fd7246	work_cpu	/home/ubuntu/Kernel_work/kmodule	EXPORT_SYMBOL	
+0x906cdd67	net_cpu	/home/ubuntu/Kernel_work/kmodule	EXPORT_SYMBOL	

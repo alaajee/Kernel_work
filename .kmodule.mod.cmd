@@ -1,0 +1,1 @@
+savedcmd_/home/ubuntu/Kernel_work/kmodule.mod := printf '%s\n'   main.o SocketHandler.o Client.o treat.o operation.o | awk '!x[$$0]++ { print("/home/ubuntu/Kernel_work/"$$0) }' > /home/ubuntu/Kernel_work/kmodule.mod

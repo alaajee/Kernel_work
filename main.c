@@ -22,9 +22,6 @@ MODULE_DESCRIPTION("Simple traitement des socket");
 struct workqueue_struct *client_wq;
 struct workqueue_struct *task_wq;
 
-
-
-
 static int __init my_module_init(void)
 {
     // Prendre en considération les erreurs ! 

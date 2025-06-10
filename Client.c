@@ -16,7 +16,7 @@ void client_handle(struct work_struct *work)
     struct connection_context *cw = container_of(work, struct connection_context, work_c);
     uint8_t *buf;
     int ret;
-    printk(KERN_INFO "hhhh mySocket is %d" , mySocket);
+    cw->mySocket++; // on initialise le mySocket à 1 pour savoir si on doit fermer la socket ou pas
     if (!cw->client_sock){
     	printk("eeeeeeeeeeeeeeeeeeeeeeehhhhhhhhhh");
 	    goto clean;
@@ -44,19 +44,10 @@ void client_handle(struct work_struct *work)
        	goto clean;
     }
    
- 
 
-    struct connection_context *cpu_task = kmalloc(sizeof(struct connection_context), GFP_KERNEL);
-    if (!cpu_task) {
-        pr_err("Erreur alloc cpu_work\n");
-        goto clean;
-    }
-
-    cpu_task->client_sock = cw->client_sock;
-
-    INIT_WORK(&cpu_task->cpu_task, work_cpu);
+    INIT_WORK(&cw->cpu_task, work_cpu);
     printk("c'est bien là");
-    queue_work(task_wq, &cpu_task->cpu_task);
+    queue_work(task_wq, &cw->cpu_task);
 
 goto end;
 

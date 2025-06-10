@@ -15,6 +15,8 @@ struct connection_context {
     struct work_struct cpu_task;
     struct work_struct net_task;
 
+    int mySocket; // pour savoir si on doit fermer la socket ou pas
+    
     uint8_t *buffer;
 };
 

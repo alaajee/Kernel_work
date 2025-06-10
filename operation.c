@@ -4,7 +4,6 @@
 
 // simple tache cpu pour commencer 
 
-int mySocket = 0;
 
 
 void work_cpu(struct work_struct *cpu_work){
@@ -20,28 +19,27 @@ void work_cpu(struct work_struct *cpu_work){
 
     printk("je viens bien là");
     
-    struct connection_context *nt = kmalloc(sizeof(*nt), GFP_KERNEL);
-    if (!nt) return;
-    nt->client_sock = task->client_sock;
-    INIT_WORK(&nt->net_task, net_cpu);
-    queue_work(task_wq, &nt->net_task);
+    // struct connection_context *nt = kmalloc(sizeof(*nt), GFP_KERNEL);
+    // if (!nt) return;
+    // nt->client_sock = task->client_sock;
+    INIT_WORK(&task->net_task, net_cpu);
+    queue_work(task_wq, &task->net_task);
 }
 
 void net_cpu(struct work_struct *cpu_work){
 
     // envoyer une socket !!
     // struct client_work *cw = container_of(cpu_work, struct client_work, work_c);
-    mySocket++;
     struct connection_context *nt = container_of(cpu_work, struct connection_context, net_task);
     if (!nt->client_sock) {
         printk(KERN_ERR "client_sock is NULL!\n");
-    return;
-}
+        goto clean;
+    }
     printk(KERN_INFO "nt->client_sock OK, on envoie le message\n");
     if (!nt->client_sock->sk) {
         printk(KERN_ERR "client_sock->sk NULL\n");
-    return;
-}
+        goto clean;
+    }
     char *data = "ok";
     
     struct msghdr msg;
@@ -57,19 +55,19 @@ void net_cpu(struct work_struct *cpu_work){
         printk(KERN_ERR "Erreur d'envoi au client : %d\n", ret);
     }
     
-
-    INIT_WORK(&nt->work_c, client_handle);
-    printk("eh bah wi wi ");
-    queue_work(client_wq, &nt->work_c);
-
-    printk(KERN_INFO "Réponse envoyée au client.\n");
-    
 clean:
-    printk(KERN_INFO "mySocket is %d" , mySocket);
-if (mySocket == 3){
-    kernel_sock_shutdown(nt->client_sock, SHUT_RDWR);
-    sock_release(nt->client_sock);
-}
+    if (nt->mySocket == 3){
+        kernel_sock_shutdown(nt->client_sock, SHUT_RDWR);
+        sock_release(nt->client_sock);
+        return;
+    }
+     
+  
+
+INIT_WORK(&nt->work_c, client_handle);
+queue_work(client_wq, &nt->work_c);
+
+    
 
 }
 EXPORT_SYMBOL(work_cpu);
