@@ -72,7 +72,8 @@ int handle_Socket(void *data) {
         }
 
         cw->client_sock = new_client;
-
+        cw->mySocket = 0; // Initialiser le compteur de socket
+        
         // cw->work : celle ci va permettre d'initialiser la tache.
         INIT_WORK(&cw->work_c, client_handle);
 

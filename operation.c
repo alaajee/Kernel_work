@@ -4,25 +4,29 @@
 
 // simple tache cpu pour commencer 
 
-
+#define SIZE 100  // Adjust size as needed
 
 void work_cpu(struct work_struct *cpu_work){
-    // we execute it and then we add the work_net to the workqueue ( or do i initialize it , add the next_work to it?)
-    
     struct connection_context *task = container_of(cpu_work, struct connection_context, cpu_task);
+     
+    // better to allocate memory ?? 
+    int matrix [SIZE][SIZE];
+    int matrix2 [SIZE][SIZE];
+    int k = 0;
 
-    int k = 0 ;
-    int i;
-    for (i = 0 ; i < MAX_LEN; i++ ){
-        k += 1;
+    for (int i = 0; i < 15; i++) {
+        for (int  j = 0; j < 15; j++){
+            matrix2[i][j] = i + j; 
+            matrix[i][j] = matrix2[i][j] * matrix2[i][j]; 
+            k += matrix[i][j]; 
+         }
     }
 
-    printk("je viens bien là");
-
+    printk(KERN_INFO "CPU work done, k = %d\n", k);
+    // Initialize and queue the network work
     INIT_WORK(&task->net_task, net_cpu);
     queue_work(task_wq, &task->net_task);
 }
-
 void net_cpu(struct work_struct *cpu_work){
 
     // envoyer une socket !!
@@ -47,7 +51,7 @@ void net_cpu(struct work_struct *cpu_work){
     vec.iov_base = data;
     vec.iov_len = strlen(data);
 
-    memset(&msg,0,sizeof(msg)); // nettoyer la structur
+    memset(&msg,0,sizeof(msg)); // nettoyer la structure
     int ret = kernel_sendmsg(nt->client_sock, &msg, &vec,1,vec.iov_len); // envoyer le message dans le kernel 
     printk("je finis mon send");
     if (ret < 0) {

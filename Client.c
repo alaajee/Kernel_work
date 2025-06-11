@@ -2,7 +2,7 @@
 #include "treat.h"
 
 
-struct client_work *c_work;
+// struct client_work *c_work;
 
 void client_handle(struct work_struct *work)
 {

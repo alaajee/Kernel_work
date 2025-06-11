@@ -11,7 +11,10 @@ kmodule-m += Client.o
 kmodule-m += treat.o
 kmodule-m += operation.o
 
+
+
 obj-m := kmodule.o
+
 
 # Chemin vers le fichier vmlinux avec debug info pour BTF
 KBUILD_VMLINUX := /usr/lib/debug/boot/vmlinux-6.11.0-26-generic
