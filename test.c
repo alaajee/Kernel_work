@@ -7,11 +7,11 @@
 #include <pthread.h>
 
 #define BUFFER_SIZE 512
-
+int count = 0;
 void* send_and_receive(void* arg) {
     int i = *(int*)arg;
     free(arg);
-
+ 
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
         perror("socket");
@@ -37,7 +37,8 @@ void* send_and_receive(void* arg) {
 
     // Once one client sends many requests over n , it blocks the server but rather we need to block only the client !!
     // Also if a client doesn"t send enough we don't close the socket so that is a problem ? 
-    for (int j = 0 ; j < 2; j++){
+    for (int j = 0 ; j <10; j++){
+	count++;
         ssize_t sent_bytes = send(sockfd, message, strlen(message), 0);
         if (sent_bytes < 0) {
             perror("send");
@@ -64,9 +65,9 @@ void* send_and_receive(void* arg) {
 }
 
 int main() {
-    pthread_t threads[7];
+    pthread_t threads[12];
 
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 10; i++) {
         int* arg = malloc(sizeof(*arg));
         *arg = i;
         if (pthread_create(&threads[i], NULL, send_and_receive, arg) != 0) {
@@ -77,10 +78,10 @@ int main() {
     }
 
     // Wait for all threads to finish
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 10; i++) {
         pthread_join(threads[i], NULL);
     }
-
+    printf("number of operations is %d \n",count);
     printf("All messages sent and responses received.\n");
     return 0;
 }

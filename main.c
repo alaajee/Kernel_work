@@ -40,7 +40,9 @@ static int __init my_module_init(void)
 
 static void __exit my_module_exit(void)
 {
-   if (listen_socket)
+    destroy_workqueue(client_wq);
+    destroy_workqueue(task_wq);
+    if (listen_socket)
         sock_release(listen_socket);
     printk(KERN_INFO "Socket libéré.\n");
 }
