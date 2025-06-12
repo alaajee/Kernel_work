@@ -62,6 +62,7 @@ void net_cpu(struct work_struct *cpu_work){
 clean:
     // This should be taken as an argument for the module 
     if (nt->mySocket == n){
+        kfree(nt);
         kernel_sock_shutdown(nt->client_sock, SHUT_RDWR);
         sock_release(nt->client_sock);
         return;

@@ -43,6 +43,9 @@ void client_handle(struct work_struct *work)
 goto end;
 
 clean:
+    // we have to free the cw 
+    kfree(cw);
+    pr_err("%s: Error in client_handle, freeing connection context\n", THIS_MODULE->name);
     kernel_sock_shutdown(cw->client_sock, SHUT_RDWR);
     sock_release(cw->client_sock);
 end:
