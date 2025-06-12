@@ -5,6 +5,12 @@
 #include "SocketHandler.h"
 #include <net/sock.h>
 
+
+int n;
+int PORT;
+module_param(n, int, 0);
+module_param(PORT, int, 0);
+
 MODULE_LICENSE("GPL"); 
 MODULE_AUTHOR("Jenninea"); 
 MODULE_DESCRIPTION("Simple traitement des socket");

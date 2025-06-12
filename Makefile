@@ -8,7 +8,6 @@ TARGET = kmodule
 kmodule-m += main.o
 kmodule-m += SocketHandler.o
 kmodule-m += Client.o
-kmodule-m += treat.o
 kmodule-m += operation.o
 
 

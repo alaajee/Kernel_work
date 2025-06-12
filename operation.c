@@ -1,6 +1,6 @@
 #include "operation.h"
 #include "Client.h"
-#include "treat.h"
+
 
 // simple tache cpu pour commencer 
 
@@ -14,8 +14,8 @@ void work_cpu(struct work_struct *cpu_work){
     int matrix2 [SIZE][SIZE];
     int k = 0;
 
-    for (int i = 0; i < 15; i++) {
-        for (int  j = 0; j < 15; j++){
+    for (int i = 0; i < SIZE; i++) {
+        for (int  j = 0; j < SIZE; j++){
             matrix2[i][j] = i + j; 
             matrix[i][j] = matrix2[i][j] * matrix2[i][j]; 
             k += matrix[i][j]; 
@@ -27,6 +27,7 @@ void work_cpu(struct work_struct *cpu_work){
     INIT_WORK(&task->net_task, net_cpu);
     queue_work(task_wq, &task->net_task);
 }
+
 void net_cpu(struct work_struct *cpu_work){
 
     // envoyer une socket !!
@@ -59,7 +60,8 @@ void net_cpu(struct work_struct *cpu_work){
     }
     printk(KERN_INFO "%d\n" , nt->mySocket);
 clean:
-    if (nt->mySocket == 3){
+    // This should be taken as an argument for the module 
+    if (nt->mySocket == n){
         kernel_sock_shutdown(nt->client_sock, SHUT_RDWR);
         sock_release(nt->client_sock);
         return;
@@ -69,10 +71,8 @@ clean:
 
 INIT_WORK(&nt->work_c, client_handle);
 queue_work(client_wq, &nt->work_c);
-
-    
-
 }
+
 EXPORT_SYMBOL(work_cpu);
 EXPORT_SYMBOL(net_cpu);
 MODULE_LICENSE("GPL");

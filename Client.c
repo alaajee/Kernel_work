@@ -1,7 +1,6 @@
 #include "Client.h"
-#include "treat.h"
-
-
+#include "operation.h"
+#include "SocketHandler.h"
 // struct client_work *c_work;
 
 void client_handle(struct work_struct *work)

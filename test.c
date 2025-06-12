@@ -21,7 +21,7 @@ void* send_and_receive(void* arg) {
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET; //IPV4
-    server_addr.sin_port = htons(11000);
+    server_addr.sin_port = htons(12000);
     server_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK); // Localhost
 
     if (connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
@@ -35,6 +35,8 @@ void* send_and_receive(void* arg) {
     snprintf(message, sizeof(message), "Hello from user program! #%d", i);
     printf("[Thread %d] Sending: %s\n", i, message);
 
+    // Once one client sends many requests over n , it blocks the server but rather we need to block only the client !!
+    // Also if a client doesn"t send enough we don't close the socket so that is a problem ? 
     for (int j = 0 ; j < 3; j++){
         ssize_t sent_bytes = send(sockfd, message, strlen(message), 0);
         if (sent_bytes < 0) {
@@ -56,18 +58,15 @@ void* send_and_receive(void* arg) {
             printf("[Thread %d] Received: %s\n", i, buffer);
         }
     }
-        
-        
-    
     
     close(sockfd);
     pthread_exit(NULL);
 }
 
 int main() {
-    pthread_t threads[5];
+    pthread_t threads[7];
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 6; i++) {
         int* arg = malloc(sizeof(*arg));
         *arg = i;
         if (pthread_create(&threads[i], NULL, send_and_receive, arg) != 0) {
@@ -77,7 +76,8 @@ int main() {
         }
     }
 
-    for (int i = 0; i < 5; i++) {
+    // Wait for all threads to finish
+    for (int i = 0; i < 6; i++) {
         pthread_join(threads[i], NULL);
     }
 
