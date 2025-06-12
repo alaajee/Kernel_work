@@ -21,7 +21,7 @@ void* send_and_receive(void* arg) {
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET; //IPV4
-    server_addr.sin_port = htons(12000);
+    server_addr.sin_port = htons(11000);
     server_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK); // Localhost
 
     if (connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
@@ -37,7 +37,7 @@ void* send_and_receive(void* arg) {
 
     // Once one client sends many requests over n , it blocks the server but rather we need to block only the client !!
     // Also if a client doesn"t send enough we don't close the socket so that is a problem ? 
-    for (int j = 0 ; j < 3; j++){
+    for (int j = 0 ; j < 1; j++){
         ssize_t sent_bytes = send(sockfd, message, strlen(message), 0);
         if (sent_bytes < 0) {
             perror("send");
