@@ -8,12 +8,13 @@
 
 
 struct socket *listen_socket;
-static struct task_struct *server_thread;
+struct task_struct *server_thread;
 
 
 int create_Serveur(void){
     // Creer le serveur de socket
 
+    // IPV4 , SOCK_STREAM, TCP
     int serv_socket = sock_create_kern(&init_net, AF_INET, SOCK_STREAM, IPPROTO_TCP, &listen_socket);
     
     if (serv_socket < 0){

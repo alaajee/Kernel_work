@@ -17,7 +17,7 @@ typedef struct client_work {
     struct work_struct work_c;
 }client_work;
 extern struct client_work *c_work;
-
+extern struct task_struct *server_thread;
 
 int create_Serveur(void);
 int handle_Socket(void *data);

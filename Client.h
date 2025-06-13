@@ -17,7 +17,7 @@ struct connection_context {
 
     int mySocket; // pour savoir si on doit fermer la socket ou pas
     
-    uint8_t *buffer;
+
 };
 
 void client_handle(struct work_struct *work);
