@@ -56,7 +56,7 @@ static void __exit my_module_exit(void)
     if (server_thread){
         kthread_stop(server_thread);
     }
-    printk(KERN_INFO "Socket libéré.\n");
+    printk(KERN_INFO "Module exited successfully .\n"); // je dois changer le message de libération de socket
 }
 
 module_init(my_module_init);
