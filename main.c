@@ -6,10 +6,14 @@
 #include <net/sock.h>
 
 
-int n;
-int PORT;
+int n = 0;
+int PORT = 0;
 module_param(n, int, 0);
+MODULE_PARM_DESC(n, "Nombre d'éléments");
+
 module_param(PORT, int, 0);
+MODULE_PARM_DESC(PORT, "Port d'écoute");
+
 
 MODULE_LICENSE("GPL"); 
 MODULE_AUTHOR("Jenninea"); 
@@ -32,6 +36,10 @@ static int __init my_module_init(void)
 {
     // Prendre en considération les erreurs ! 
     // CHECK THE FLAG WQ_UNBOUND
+
+    printk(KERN_INFO "Valeur de n = %d\n", n);
+    printk(KERN_INFO "Valeur de PORT = %d\n", PORT);
+    
     client_wq = alloc_workqueue("clients_wq", WQ_UNBOUND, 4);
     task_wq = alloc_workqueue("task_wq",WQ_UNBOUND , 3); // peut etre n ? 
 
