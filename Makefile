@@ -9,7 +9,10 @@ kmodule-m += main.o
 kmodule-m += SocketHandler.o
 kmodule-m += Client.o
 kmodule-m += operation.o
-
+kmodule-m += KVS/src/db.o
+kmodule-m += KVS/src/io.o
+kmodule-m += KVS/src/bucket.o
+kmodule-m += KVS/src/bench.o	
 
 
 obj-m := kmodule.o

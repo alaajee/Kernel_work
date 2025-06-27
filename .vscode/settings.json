@@ -6,6 +6,7 @@
         "client.h": "c",
         "cstdint": "c",
         "operation.h": "c",
-        "treat.h": "c"
+        "treat.h": "c",
+        "typeinfo": "c"
     }
 }

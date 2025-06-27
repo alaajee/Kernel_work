@@ -5,6 +5,9 @@
 
 void client_handle(struct work_struct *work)
 {
+    // here i can create myBD
+    // I can after that add this db to my structure cw
+    
     struct connection_context *cw = container_of(work, struct connection_context, work_c);
     uint8_t *buf;
     int ret;
@@ -35,11 +38,42 @@ void client_handle(struct work_struct *work)
         kfree(buf);
        	goto clean;
     }
- 
 
-    INIT_WORK(&cw->cpu_task, work_cpu);
-    queue_work(task_wq, &cw->cpu_task);
+    // here if i have the message received is put i call work_store 
+    char *data = buf;
 
+    KrDb* db = NULL; /* used differently by all switch cases */
+
+    KrOutbuf outbuf = kr_outbuf(sizeof(u64));
+
+    /* helper macros for reading message data */
+    #define NEXT_U8()  (*(u8* )((data += sizeof(u8))  - sizeof(u8)))
+    #define NEXT_U64() (*(u64*)((data += sizeof(u64)) - sizeof(u64)))
+    #define NEXT_PTR(len) ((data += len) - len)
+    #define GET_DB() do {                                       \
+            db = kr_db_from_id(NEXT_U8());                      \
+            if (!db) {                                          \
+                printk(KERN_INFO "GET_DB WITH INVALID ID\n");   \
+                goto clean;                                         \
+            }                                                   \
+        } while (0)
+    
+    ret = kr_db_open(&db, "/dev/loop30");
+
+    if (ret < 0) {
+        pr_err("%s: kr_db_open failed: %d\n", THIS_MODULE->name, ret);
+        goto clean;
+    }
+    cw->db = db; // on stocke la db dans le cw
+    // here we will replace the work_cpu with a key/value task 
+    if (strncmp(data, "put", 3) == 0) {
+        INIT_WORK(&cw->store_task, work_store);
+        queue_work(task_wq, &cw->store_task);
+    } else if (strncmp(data, "get", 3) == 0) {
+        INIT_WORK(&cw->get_task, work_get);
+        queue_work(task_wq, &cw->get_task);
+    }
+   
 goto end;
 
 clean:

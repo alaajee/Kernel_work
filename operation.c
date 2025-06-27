@@ -6,6 +6,35 @@
 
 #define SIZE 100  // Adjust size as needed
 
+// for the store and the get , we can use just one database that i will initialize in main.c and here i manipulate the store etc
+void work_store(struct work_struct *store_work){
+    struct connection_context *cn = container_of(store_work, struct connection_context, store_task);
+    
+    
+    int ret = kr_db_put(cn->db, (KrSlice){.data = "key", .size = 3}, (KrSlice){.data = "value", .size = 5});
+    if (ret < 0) {
+        printk(KERN_ERR "Error in kr_db_put: %d\n", ret);
+        return;
+    }
+    printk(KERN_INFO "Put operation successful\n");
+    // Initialize and queue the network work
+    INIT_WORK(&cn->net_task, work_cpu);
+    queue_work(task_wq, &cn->net_task);
+}
+
+void work_get(struct work_struct *get_work){
+    struct connection_context *cn = container_of(get_work, struct connection_context, get_task);
+    // Here we can implement the get operation, for now we just print a message
+
+    int ret = kr_db_get(cn->db, (KrSlice){.data = "key", .size = 3}, NULL, NULL);
+    if (ret < 0) {
+        printk(KERN_ERR "Error in kr_db_get: %d\n", ret);
+        return;
+    }
+    printk(KERN_INFO "Get operation successful\n");
+    INIT_WORK(&cn->net_task, work_cpu);
+    queue_work(task_wq, &cn->net_task);
+}
 void work_cpu(struct work_struct *cpu_work){
     struct connection_context *cn = container_of(cpu_work, struct connection_context, cpu_task);
      
