@@ -9,31 +9,53 @@
 // for the store and the get , we can use just one database that i will initialize in main.c and here i manipulate the store etc
 void work_store(struct work_struct *store_work){
     struct connection_context *cn = container_of(store_work, struct connection_context, store_task);
+    char* data= cn->data; // on recupere le data du 
+    char key[256];
+
+    if (sscanf(data, "put %s", key) == 1) {
+        printk("Key: %s\n", key);
+    }
+
+    char value[256];
+    if (sscanf(data, "put %*s %s", value) == 1) {
+        printk("Value: %s\n", value);
+    } 
     
-    
-    int ret = kr_db_put(cn->db, (KrSlice){.data = "key", .size = 3}, (KrSlice){.data = "value", .size = 5});
+    int ret = kr_db_put(cn->db, (KrSlice){.data = key , .size = strlen(key)}, (KrSlice){.data = value, .size = strlen(value)});
     if (ret < 0) {
         printk(KERN_ERR "Error in kr_db_put: %d\n", ret);
         return;
     }
     printk(KERN_INFO "Put operation successful\n");
     // Initialize and queue the network work
-    INIT_WORK(&cn->net_task, work_cpu);
-    queue_work(task_wq, &cn->net_task);
+    INIT_WORK(&cn->cpu_task, work_cpu);
+    queue_work(task_wq, &cn->cpu_task);
 }
 
 void work_get(struct work_struct *get_work){
     struct connection_context *cn = container_of(get_work, struct connection_context, get_task);
     // Here we can implement the get operation, for now we just print a message
+    u64 size;
+    char *key = kmalloc(256, GFP_KERNEL);
+    if (!key) return;
 
-    int ret = kr_db_get(cn->db, (KrSlice){.data = "key", .size = 3}, NULL, NULL);
+    if (sscanf(cn->data, "get %s", key) == 1) {
+        printk(KERN_INFO "Key to get: %s\n", key);
+    } else {
+        printk(KERN_ERR "Failed to parse key\n");
+        kfree(key);
+        return;
+    }
+
+
+    int ret = kr_db_get(cn->db, (KrSlice){.data = key , .size =  strlen(key)}, cn->outbuf,&size,cn);
     if (ret < 0) {
         printk(KERN_ERR "Error in kr_db_get: %d\n", ret);
         return;
     }
     printk(KERN_INFO "Get operation successful\n");
-    INIT_WORK(&cn->net_task, work_cpu);
-    queue_work(task_wq, &cn->net_task);
+    INIT_WORK(&cn->cpu_task, work_cpu);
+    queue_work(task_wq, &cn->cpu_task);
 }
 void work_cpu(struct work_struct *cpu_work){
     struct connection_context *cn = container_of(cpu_work, struct connection_context, cpu_task);
@@ -86,6 +108,9 @@ void work_net(struct work_struct *net_work){
     printk("je finis mon send");
     if (ret < 0) {
         printk(KERN_ERR "Erreur d'envoi au client : %d\n", ret);
+        kfree(cn);
+        kernel_sock_shutdown(cn->client_sock, SHUT_RDWR);
+        sock_release(cn->client_sock);
     }
     printk(KERN_INFO "%d\n" , cn->mySocket);
 clean:

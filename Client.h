@@ -19,12 +19,15 @@ struct connection_context {
     struct work_struct get_task;
     struct KrDb* db;
 
+    struct KrOutbuf *outbuf; // on stocke l'outbuf dans le cw pour l'utiliser dans les autres fonctions
+    char *data; // on stocke le data dans le cw pour l'utiliser dans les autres fonctions
+    
     int mySocket; // pour savoir si on doit fermer la socket ou pas
     
 
 };
 
 void client_handle(struct work_struct *work);
-
+void begin_work(struct work_struct *work);
 
 #endif

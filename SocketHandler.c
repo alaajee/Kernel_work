@@ -77,7 +77,7 @@ int handle_Socket(void *data) {
         cw->mySocket = 0; // Initialiser le compteur de socket
         
         // cw->work : celle ci va permettre d'initialiser la tache.
-        INIT_WORK(&cw->work_c, client_handle);
+        INIT_WORK(&cw->work_c,client_handle);
 
         // ceci permet d'ajouter la tache à la wq client_wq et des qu'un thread se libere elle va s'executer !! 
         queue_work(client_wq, &cw->work_c);
