@@ -32,12 +32,13 @@ void* send_and_receive(void* arg) {
 
     // Writing a message to the server
     char message[128];
-    snprintf(message, sizeof(message), "get hh");
-    printf("[Thread %d] Sending: %s\n", i, message);
+    snprintf(message, sizeof(message), "put name alaa");
+    
 
     // Once one client sends many requests over n , it blocks the server but rather we need to block only the client !!
     // Also if a client doesn"t send enough we don't close the socket so that is a problem ? 
-    for (int j = 0 ; j < 1  ; j++){
+    for (int j = 0 ; j < 4  ; j++){
+        printf("[Thread %d] Sending: %s\n", i, message);
 	    count++;
         ssize_t sent_bytes = send(sockfd, message, strlen(message), 0);
         if (sent_bytes < 0) {
@@ -49,6 +50,7 @@ void* send_and_receive(void* arg) {
 
          // Réception de la réponse
         char buffer[BUFFER_SIZE];
+        memset(buffer, 0, sizeof(buffer));
         ssize_t recv_bytes = recv(sockfd, buffer, sizeof(buffer)-1, 0);
         if (recv_bytes < 0) {
             perror("recv");
@@ -58,6 +60,8 @@ void* send_and_receive(void* arg) {
             buffer[recv_bytes] = '\0';
             printf("[Thread %d] Received: %s\n", i, buffer);
         }
+        
+        snprintf(message, sizeof(message), "get name");
     }
     
     close(sockfd);

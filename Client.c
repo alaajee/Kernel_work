@@ -48,9 +48,10 @@ void client_handle(struct work_struct *work)
     cw->outbuf = &outbuf; // on stocke l'outbuf dans le cw
 
     /* helper macros for reading message data */
+    // here we extract the NEXT_U8, NEXT_U64, NEXT_PTR macros
     #define NEXT_U8()  (*(u8* )((data += sizeof(u8))  - sizeof(u8)))
-    #define NEXT_U64() (*(u64*)((data += sizeof(u64)) - sizeof(u64)))
-    #define NEXT_PTR(len) ((data += len) - len)
+    // #define NEXT_U64() (*(u64*)((data += sizeof(u64)) - sizeof(u64)))
+    // #define NEXT_PTR(len) ((data += len) - len)
     #define GET_DB() do {                                       \
             db = kr_db_from_id(NEXT_U8());                      \
             if (!db) {                                          \
