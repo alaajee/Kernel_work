@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <pthread.h>
+#include <stdbool.h>
 
 #define BUFFER_SIZE 512
 int count = 0;
@@ -29,15 +30,27 @@ void* send_and_receive(void* arg) {
         close(sockfd);
         pthread_exit(NULL);
     }
-
+    int k = 0;
     // Writing a message to the server
     char message[128];
-    snprintf(message, sizeof(message), "put name alaa");
     
-
+    
+    bool put = true;
     // Once one client sends many requests over n , it blocks the server but rather we need to block only the client !!
     // Also if a client doesn"t send enough we don't close the socket so that is a problem ? 
-    for (int j = 0 ; j < 4  ; j++){
+    for (int j = 0 ; j < 500  ; j++){
+        if (put) {
+            printf("Our k is %d \n", k);
+            snprintf(message, sizeof(message), "put name[%d] alaa[%d]", k, k);
+            put = false;
+            
+        } else {
+            snprintf(message, sizeof(message), "get name[%d] ", k);
+            put = true;
+            k++;
+            printf("Oour k is %d \n", k);
+        }
+       
         printf("[Thread %d] Sending: %s\n", i, message);
 	    count++;
         ssize_t sent_bytes = send(sockfd, message, strlen(message), 0);
@@ -60,8 +73,8 @@ void* send_and_receive(void* arg) {
             buffer[recv_bytes] = '\0';
             printf("[Thread %d] Received: %s\n", i, buffer);
         }
-        
-        snprintf(message, sizeof(message), "get name");
+       
+       
     }
     
     close(sockfd);
