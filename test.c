@@ -9,6 +9,7 @@
 
 #define BUFFER_SIZE 512
 int count = 0;
+
 void* send_and_receive(void* arg) {
     int i = *(int*)arg;
     free(arg);
@@ -21,70 +22,68 @@ void* send_and_receive(void* arg) {
 
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET; //IPV4
+    server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(12345);
-    server_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK); // Localhost
+    server_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK); // 127.0.0.1
 
     if (connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
         perror("connect");
         close(sockfd);
         pthread_exit(NULL);
     }
+
     int k = 0;
-    // Writing a message to the server
-    char message[128];
-    
-    
     bool put = true;
-    // Once one client sends many requests over n , it blocks the server but rather we need to block only the client !!
-    // Also if a client doesn"t send enough we don't close the socket so that is a problem ? 
-    for (int j = 0 ; j < 500  ; j++){
+    char message[128];
+
+    for (int j = 0 ; j < 500; j++) {
         if (put) {
-            printf("Our k is %d \n", k);
-            snprintf(message, sizeof(message), "put name[%d] alaa[%d]", k, k);
+            snprintf(message, sizeof(message), "put name%d alaa%d\n", k, k);
             put = false;
-            
+            printf("[Thread %d] PUT name%d -> alaa%d\n", i, k, k);
         } else {
-            snprintf(message, sizeof(message), "get name[%d] ", k);
+            snprintf(message, sizeof(message), "get name%d\n", k);
             put = true;
-            k++;
-            printf("Oour k is %d \n", k);
+            printf("[Thread %d] GET name%d\n", i, k);
+            k++;  // Increment only after get
         }
-       
-        printf("[Thread %d] Sending: %s\n", i, message);
-	    count++;
+
+        count++;
         ssize_t sent_bytes = send(sockfd, message, strlen(message), 0);
         if (sent_bytes < 0) {
             perror("send");
             close(sockfd);
             pthread_exit(NULL);
         }
-        printf("[Thread %d] Message sent successfully (%zd bytes)\n", i, sent_bytes);
 
-         // Réception de la réponse
         char buffer[BUFFER_SIZE];
         memset(buffer, 0, sizeof(buffer));
         ssize_t recv_bytes = recv(sockfd, buffer, sizeof(buffer)-1, 0);
-        if (recv_bytes < 0) {
-            perror("recv");
-        } else if (recv_bytes == 0) {
-            printf("[Thread %d] Server closed connection\n", i);
-        } else {
-            buffer[recv_bytes] = '\0';
-            printf("[Thread %d] Received: %s\n", i, buffer);
+        if (recv_bytes <= 0) {
+            if (recv_bytes == 0) {
+                printf("[Thread %d] Server closed connection\n", i);
+            } else {
+                perror("recv");
+            }
+            break;
         }
-       
-       
+
+        buffer[recv_bytes] = '\0';
+        printf("[Thread %d] Received: %s\n", i, buffer);
+
+        // Optional: sleep to avoid flooding the server too fast
+        usleep(1000); // 1ms
     }
-    
+
     close(sockfd);
     pthread_exit(NULL);
 }
 
 int main() {
     pthread_t threads[10];
+    int num_threads = 1; // adjust as needed
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < num_threads; i++) {
         int* arg = malloc(sizeof(*arg));
         *arg = i;
         if (pthread_create(&threads[i], NULL, send_and_receive, arg) != 0) {
@@ -94,13 +93,11 @@ int main() {
         }
     }
 
-    // Wait for all threads to finish
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < num_threads; i++) {
         pthread_join(threads[i], NULL);
     }
-    printf("number of operations is %d \n",count);
+
+    printf("Number of operations: %d\n", count);
     printf("All messages sent and responses received.\n");
     return 0;
 }
-
-// gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'fr')]" 
