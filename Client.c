@@ -2,7 +2,7 @@
 #include "operation.h"
 #include "SocketHandler.h"
 // struct client_work *c_work;
-
+int loop = 18;
 void client_handle(struct work_struct *work)
 {
     // here i can create myBD
@@ -47,6 +47,8 @@ void client_handle(struct work_struct *work)
 
     cw->outbuf = &outbuf; // on stocke l'outbuf dans le cw
 
+
+
     /* helper macros for reading message data */
     // here we extract the NEXT_U8, NEXT_U64, NEXT_PTR macros
     #define NEXT_U8()  (*(u8* )((data += sizeof(u8))  - sizeof(u8)))
@@ -60,8 +62,13 @@ void client_handle(struct work_struct *work)
             }                                                   \
         } while (0)
     
-    int ret = kr_db_open(&db, "/dev/loop18");
+    char name[256];
+    snprintf(name,sizeof(name), "/dev/loop%d", loop);
+    loop++;
 
+    int ret = kr_db_open(&db,"/dev/loop31");
+
+    printk("we open with the name %s\n", name);
     if (ret < 0) {
         pr_err("%s: kr_db_open failed: %d\n", THIS_MODULE->name, ret);
         goto clean;

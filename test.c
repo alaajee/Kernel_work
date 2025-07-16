@@ -36,43 +36,70 @@ void* send_and_receive(void* arg) {
     bool put = true;
     char message[128];
 
-    for (int j = 0 ; j < 500; j++) {
+    for (int j = 0 ; j < 2; j++) {
         if (put) {
             snprintf(message, sizeof(message), "put name%d alaa%d\n", k, k);
             put = false;
             printf("[Thread %d] PUT name%d -> alaa%d\n", i, k, k);
+            count++;
+            ssize_t sent_bytes = send(sockfd, message, strlen(message), 0);
+            if (sent_bytes < 0) {
+                perror("send");
+                close(sockfd);
+                pthread_exit(NULL);
+            }
+
+            char buffer[BUFFER_SIZE];
+            memset(buffer, 0, sizeof(buffer));
+            ssize_t recv_bytes = recv(sockfd, buffer, sizeof(buffer)-1, 0);
+            if (recv_bytes <= 0) {
+                if (recv_bytes == 0) {
+                    printf("[Thread %d] Server closed connection\n", i);
+                } else {
+                    perror("recv");
+                }
+                break;
+            }
+
+            buffer[recv_bytes] = '\0';
+            printf("[Thread %d] Received: %s\n", i, buffer);
+
+            // Optional: sleep to avoid flooding the server too fast
+            usleep(1000); // 1ms
         } else {
             snprintf(message, sizeof(message), "get name%d\n", k);
             put = true;
             printf("[Thread %d] GET name%d\n", i, k);
             k++;  // Increment only after get
-        }
-
-        count++;
-        ssize_t sent_bytes = send(sockfd, message, strlen(message), 0);
-        if (sent_bytes < 0) {
-            perror("send");
-            close(sockfd);
-            pthread_exit(NULL);
-        }
-
-        char buffer[BUFFER_SIZE];
-        memset(buffer, 0, sizeof(buffer));
-        ssize_t recv_bytes = recv(sockfd, buffer, sizeof(buffer)-1, 0);
-        if (recv_bytes <= 0) {
-            if (recv_bytes == 0) {
-                printf("[Thread %d] Server closed connection\n", i);
-            } else {
-                perror("recv");
+            count++;
+            ssize_t sent_bytes = send(sockfd, message, strlen(message), 0);
+            if (sent_bytes < 0) {
+                perror("send");
+                close(sockfd);
+                pthread_exit(NULL);
             }
-            break;
-        }
 
-        buffer[recv_bytes] = '\0';
-        printf("[Thread %d] Received: %s\n", i, buffer);
+            char buffer[BUFFER_SIZE];
+            memset(buffer, 0, sizeof(buffer));
+            ssize_t recv_bytes = recv(sockfd, buffer, sizeof(buffer)-1, 0);
+            ssize_t recv_bytes1 = recv(sockfd, buffer, sizeof(buffer)-1, 0);
+            if (recv_bytes <= 0) {
+                if (recv_bytes == 0) {
+                    printf("[Thread %d] Server closed connection\n", i);
+                } else {
+                    perror("recv");
+                }
+                break;
+            }
 
-        // Optional: sleep to avoid flooding the server too fast
-        usleep(1000); // 1ms
+            buffer[recv_bytes] = '\0';
+            printf("[Thread %d] Received: %s\n", i, buffer);
+
+            // Optional: sleep to avoid flooding the server too fast
+            usleep(1000); // 1ms
+            }
+
+        
     }
 
     close(sockfd);
@@ -81,7 +108,7 @@ void* send_and_receive(void* arg) {
 
 int main() {
     pthread_t threads[10];
-    int num_threads = 1; // adjust as needed
+    int num_threads = 2; // adjust as needed
 
     for (int i = 0; i < num_threads; i++) {
         int* arg = malloc(sizeof(*arg));
