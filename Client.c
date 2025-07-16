@@ -66,7 +66,7 @@ void client_handle(struct work_struct *work)
     snprintf(name,sizeof(name), "/dev/loop%d", loop);
     loop++;
 
-    int ret = kr_db_open(&db,"/dev/loop31");
+    int ret = kr_db_open(&db,name);
 
     printk("we open with the name %s\n", name);
     if (ret < 0) {

@@ -107,8 +107,8 @@ void* send_and_receive(void* arg) {
 }
 
 int main() {
-    pthread_t threads[10];
-    int num_threads = 2; // adjust as needed
+    pthread_t threads[51];
+    int num_threads = 50; // adjust as needed
 
     for (int i = 0; i < num_threads; i++) {
         int* arg = malloc(sizeof(*arg));
