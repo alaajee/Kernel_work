@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Répertoire contenant les images
-IMG_DIR="/home/jennine/GrapheSimple"
+IMG_DIR="/home/alaa/Kernel_work/LOOP"
 
 # Étape 1 : Libérer les anciens loop devices (s'ils sont encore attachés)
 echo "🔄 Détachement des anciens loop devices..."
