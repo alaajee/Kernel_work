@@ -57,6 +57,7 @@ void work_get(struct work_struct *get_work){
     INIT_WORK(&cn->cpu_task, work_cpu);
     queue_work(task_wq, &cn->cpu_task);
 }
+
 void work_cpu(struct work_struct *cpu_work){
     struct connection_context *cn = container_of(cpu_work, struct connection_context, cpu_task);
      
@@ -95,7 +96,7 @@ void work_net(struct work_struct *net_work){
         printk(KERN_ERR "client_sock->sk NULL\n");
         goto clean;
     }
-    char *data = "ok";
+    char *data = "ok\0";
     
     struct msghdr msg;
     struct kvec vec;

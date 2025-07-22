@@ -1,21 +1,22 @@
 # Liste des modules à compiler
 CONFIG_MODULE_SIG=n
 
-ccflags-y += -Wall -g -O3
+ccflags-y += -Wall -g -O3 -I$(PWD)
 
 TARGET = kmodule
 
-kmodule-m += main.o
-kmodule-m += SocketHandler.o
-kmodule-m += Client.o
-kmodule-m += operation.o
-kmodule-m += KVS/src/db.o
-kmodule-m += KVS/src/io.o
-kmodule-m += KVS/src/bucket.o
-kmodule-m += KVS/src/bench.o	
-
-
 obj-m := kmodule.o
+
+kmodule-objs := \
+	bin/main.o \
+	bin/SocketHandler.o \
+	bin/Client.o \
+	bin/operation.o \
+	KVS/src/db.o \
+	KVS/src/io.o \
+	KVS/src/bucket.o \
+	KVS/src/bench.o
+
 
 
 # Chemin vers le fichier vmlinux avec debug info pour BTF

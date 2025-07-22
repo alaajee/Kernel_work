@@ -94,56 +94,63 @@ void begin_work(struct work_struct *work)
     struct connection_context *cw = container_of(work, struct connection_context, work_c);
     uint8_t *buf;
     int ret;
-    
     if (!cw->client_sock){
-    	printk("eeeeeeeeeeeeeeeeeeeeeeehhhhhhhhhh");
-	    goto clean;
+        printk("eeeeeeeeeeeeeeeeeeeeeeehhhhhhhhhh");
+        goto clean;
     }
+
     buf = kmalloc(BUF_SIZE, GFP_KERNEL);
     if (!buf) {
         pr_err("%s: Failed to allocate memory for buffer\n", THIS_MODULE->name);
         goto clean;
     }
-    char *data  = buf;
+
+    char *data = buf;
     struct kvec iov = {
-        .iov_base = buf,
-        .iov_len = BUF_SIZE,
+    .iov_base = buf,
+    .iov_len = BUF_SIZE,
     };
 
     struct msghdr msg = {0};
-
     ret = kernel_recvmsg(cw->client_sock, &msg, &iov, 1, BUF_SIZE, 0); // on lit du msg et on stocke dans iov
-    
+    printk("The problem might be here while receiving the key");
+
     if (ret < 0) {
         pr_err("%s: kernel_recvmsg failed: %d\n", THIS_MODULE->name, ret);
-       	kernel_sock_shutdown(cw->client_sock, SHUT_RDWR);
+        kernel_sock_shutdown(cw->client_sock, SHUT_RDWR);
         sock_release(cw->client_sock);
         kfree(buf);
-       	goto clean;
+        goto clean;
     }
+
+    for (int i = 0; i < ret; ++i) {
+        if (data[i] == '\n' || data[i] == '\r') {
+        data[i] = '\0';
+        break;
+    }
+    }
+    printk(KERN_INFO "[RECV] Message nettoyé : '%s'\n", data);
     cw->data = data; // on stocke le data dans le cw
     if (strncmp(data,"put" , 3) == 0) {
         INIT_WORK(&cw->store_task, work_store);
         queue_work(client_wq, &cw->store_task);
-    } else if (strncmp(data, "get", 3) == 0) {      
+    } else if (strncmp(data, "get", 3) == 0) {
         INIT_WORK(&cw->get_task, work_get);
         queue_work(client_wq, &cw->get_task);
     } else {
         pr_err("%s: Unknown command received: %s\n", THIS_MODULE->name, data);
         goto clean;
     }
-goto end;
-
-clean:
-    // we have to free the cw 
+    goto end;
+    clean:
+    // we have to free the cw
     kfree(cw);
     pr_err("%s: Error in client_handle, freeing connection context\n", THIS_MODULE->name);
     kernel_sock_shutdown(cw->client_sock, SHUT_RDWR);
     sock_release(cw->client_sock);
-end:
+    end:
     if (buf)
-      	kfree(buf);
-
+    kfree(buf);
 }
 // #include <linux/string.h>
 // #include <linux/slab.h>
