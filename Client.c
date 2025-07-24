@@ -2,7 +2,7 @@
 #include "operation.h"
 #include "SocketHandler.h"
 // struct client_work *c_work;
-int loop = 18;
+
 void client_handle(struct work_struct *work)
 {
     // here i can create myBD
@@ -104,8 +104,9 @@ void begin_work(struct work_struct *work)
         pr_err("%s: Failed to allocate memory for buffer\n", THIS_MODULE->name);
         goto clean;
     }
-
     char *data = buf;
+    do {
+
     struct kvec iov = {
     .iov_base = buf,
     .iov_len = BUF_SIZE,
@@ -114,7 +115,7 @@ void begin_work(struct work_struct *work)
     struct msghdr msg = {0};
     ret = kernel_recvmsg(cw->client_sock, &msg, &iov, 1, BUF_SIZE, 0); // on lit du msg et on stocke dans iov
     printk("The problem might be here while receiving the key");
-
+    }while (ret==0);
     if (ret < 0) {
         pr_err("%s: kernel_recvmsg failed: %d\n", THIS_MODULE->name, ret);
         kernel_sock_shutdown(cw->client_sock, SHUT_RDWR);

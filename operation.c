@@ -96,7 +96,7 @@ void work_net(struct work_struct *net_work){
         printk(KERN_ERR "client_sock->sk NULL\n");
         goto clean;
     }
-    char *data = "ok\0";
+    char *data = "ok\n";
     
     struct msghdr msg;
     struct kvec vec;

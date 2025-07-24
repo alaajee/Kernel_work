@@ -9,6 +9,8 @@
 #define BUF_SIZE 64
 
 extern struct workqueue_struct *client_wq; // celle la est la workqueue des clients 
+extern int loop;
+
 struct connection_context {
     struct socket *client_sock;
 

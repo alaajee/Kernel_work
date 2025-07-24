@@ -8,12 +8,15 @@
 
 int n = 0;
 int PORT = 0;
+int loop = 39;
 module_param(n, int, 0);
 MODULE_PARM_DESC(n, "Nombre d'éléments");
 
 module_param(PORT, int, 0);
 MODULE_PARM_DESC(PORT, "Port d'écoute");
 
+module_param(loop, int, 0644);
+MODULE_PARM_DESC(loop, "le fichier à ouvrir");
 
 MODULE_LICENSE("GPL"); 
 MODULE_AUTHOR("Jenninea"); 
