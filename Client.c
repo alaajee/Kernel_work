@@ -105,7 +105,7 @@ void begin_work(struct work_struct *work)
         goto clean;
     }
     char *data = buf;
-    do {
+    
 
     struct kvec iov = {
     .iov_base = buf,
@@ -115,7 +115,7 @@ void begin_work(struct work_struct *work)
     struct msghdr msg = {0};
     ret = kernel_recvmsg(cw->client_sock, &msg, &iov, 1, BUF_SIZE, 0); // on lit du msg et on stocke dans iov
     printk("The problem might be here while receiving the key");
-    }while (ret==0);
+    
     if (ret < 0) {
         pr_err("%s: kernel_recvmsg failed: %d\n", THIS_MODULE->name, ret);
         kernel_sock_shutdown(cw->client_sock, SHUT_RDWR);

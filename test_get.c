@@ -23,7 +23,6 @@ static inline uint64_t now_us() {
     return (uint64_t)ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
 }
 
-
 void* client_operations(void* arg) {
     thread_args* args = (thread_args*)arg;
     int i = args->thread_id;
@@ -34,19 +33,22 @@ void* client_operations(void* arg) {
     char buffer[BUFFER_SIZE];
     int k;
 
-    uint64_t start_time , end_time, latency_time;
+    uint64_t start_time, end_time, latency_time;
 
-    // Phase PUT
+    // Phase GET
     for (k = 0; k < NUM_OPERATIONS; k++) {
-        snprintf(message, sizeof(message), "get name%d\n",  k);
-        printf("[Thread %d] PUT name%d -> alaa%d\n", i, k, k);
+        snprintf(message, sizeof(message), "get name%d\n", k);
+        printf("[Thread %d] GET name%d\n", i, k);
+        
         start_time = now_us();
+
         if (send(sockfd, message, strlen(message), 0) < 0) {
             perror("send failed");
             close(sockfd);
             return NULL;
         }
-
+        
+        memset(buffer, 0, sizeof(buffer));
         int total = 0;
         while (1) {
             ssize_t recv_bytes = recv(sockfd, buffer + total, sizeof(buffer) - total - 1, 0);
@@ -63,55 +65,13 @@ void* client_operations(void* arg) {
                 break;
             }
         }
+        
         end_time = now_us();
         latency_time = end_time - start_time;
-        
-        // printf("[Thread %d] Received: %s\n", i, buffer);
         printf("[Thread %d] Received: %s | Latency: %lu us\n", i, buffer, latency_time);
     }
 
-    // sleep(1);
-    // // Phase GET
-    // for (k = 0; k < 1; k++) {
-    //     snprintf(message, sizeof(message), "get name%d\n", k);
-    //     printf("[Thread %d] GET name%d\n", i, k);
-        
-    //     start_time = now_us();
-
-    //     if (send(sockfd, message, strlen(message), 0) < 0) {
-    //         perror("send failed");
-    //         close(sockfd);
-    //         return NULL;
-    //     }
-        
-    //     memset(buffer, 0, sizeof(buffer));
-    //     int total = 0;
-    //     while (1) {
-    //         ssize_t recv_bytes = recv(sockfd, buffer + total, sizeof(buffer) - total - 1, 0);
-    //         if (recv_bytes <= 0) {
-    //             perror("recv failed");
-    //             close(sockfd);
-    //             return NULL;
-    //         }
-    //         total += recv_bytes;
-    //         buffer[total] = '\0';
-
-    //         // On a reçu une ligne complète
-    //         if (strchr(buffer, '\n') != NULL) {
-    //             break;
-    //         }
-    //     }
-
-        
-       
-    //     // printf("[Thread %d] Received: %s\n", i, buffer);
-    //     end_time = now_us();
-    //     latency_time = end_time - start_time;
-    //     printf("[Thread %d] Received: %s | Latency: %lu us\n", i, buffer, latency_time);
-    // }
-
     // close(sockfd);
-    shutdown(sockfd, SHUT_WR);
     return NULL;
 }
 
@@ -121,7 +81,7 @@ int main() {
 
     uint64_t start_time = now_us();
 
-    printf("Starting %d client threads...\n", num_threads);
+    printf("Starting %d client threads for GET operations...\n", num_threads);
 
     for (int i = 0; i < num_threads; i++) {
         // Création du socket
@@ -156,25 +116,21 @@ int main() {
             free(args);
             close(sockfd);
         }
-        
-
-        // usleep(10000); // Délai entre création de threads
     }
 
     // Attente des threads
     for (int i = 0; i < num_threads; i++) {
         pthread_join(threads[i], NULL);
-        
     }
 
     uint64_t end_time = now_us();
     double elapsed_sec = (end_time - start_time) / 1e6;
 
-    int total_operations = num_threads * 5 ; // 5 = PUT + GET phases
+    int total_operations = num_threads * NUM_OPERATIONS;
 
     double throughput = total_operations / elapsed_sec;
 
-    printf("All operations completed.\n");
+    printf("All GET operations completed.\n");
     printf("Elapsed time: %.3f seconds\n", elapsed_sec);
     printf("Throughput: %.2f operations per second\n", throughput);
     return 0;
