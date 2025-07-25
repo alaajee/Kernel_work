@@ -38,7 +38,7 @@ void* client_operations(void* arg) {
 
     // Phase PUT
     for (k = 0; k < NUM_OPERATIONS; k++) {
-        snprintf(message, sizeof(message), "put name%d alaa%d\n", k, k);
+        snprintf(message, sizeof(message), "get name%d\n",  k);
         printf("[Thread %d] PUT name%d -> alaa%d\n", i, k, k);
         start_time = now_us();
         if (send(sockfd, message, strlen(message), 0) < 0) {
@@ -47,15 +47,25 @@ void* client_operations(void* arg) {
             return NULL;
         }
 
-        ssize_t recv_bytes = recv(sockfd, buffer, sizeof(buffer)-2, 0);
-        if (recv_bytes <= 0) {
-            perror("recv failed");
-            close(sockfd);
-            return NULL;
+        int total = 0;
+        while (1) {
+            ssize_t recv_bytes = recv(sockfd, buffer + total, sizeof(buffer) - total - 1, 0);
+            if (recv_bytes <= 0) {
+                perror("recv failed");
+                close(sockfd);
+                return NULL;
+            }
+            total += recv_bytes;
+            buffer[total] = '\0';
+
+            // On a reçu une ligne complète
+            if (strchr(buffer, '\n') != NULL) {
+                break;
+            }
         }
         end_time = now_us();
         latency_time = end_time - start_time;
-        buffer[recv_bytes] = '\0';
+        
         // printf("[Thread %d] Received: %s\n", i, buffer);
         printf("[Thread %d] Received: %s | Latency: %lu us\n", i, buffer, latency_time);
     }

@@ -49,7 +49,7 @@ void* client_operations(void* arg) {
     }
 
     // Phase GET
-    for (k = 0; k < NUM_OPERATIONS; k++) {
+    for (k = 0; k < 2; k++) {
         snprintf(message, sizeof(message), "get name%d\n", k);
         printf("[Thread %d] GET name%d\n", i, k);
 
@@ -58,14 +58,22 @@ void* client_operations(void* arg) {
             close(sockfd);
             return NULL;
         }
+        int total = 0;
+        while (1) {
+            ssize_t recv_bytes = recv(sockfd, buffer + total, sizeof(buffer) - total - 1, 0);
+            if (recv_bytes <= 0) {
+                perror("recv failed");
+                close(sockfd);
+                return NULL;
+            }
+            total += recv_bytes;
+            buffer[total] = '\0';
 
-        ssize_t recv_bytes = recv(sockfd, buffer, sizeof(buffer)-1, 0);
-        if (recv_bytes <= 0) {
-            perror("recv failed");
-            close(sockfd);
-            return NULL;
+            
+            if (strchr(buffer, '\n') != NULL) {
+                break;
+            }
         }
-        buffer[recv_bytes] = '\0';
         printf("[Thread %d] Received: %s\n", i, buffer);
     }
 
@@ -74,8 +82,8 @@ void* client_operations(void* arg) {
 }
 
 int main() {
-    pthread_t threads[30];
-    int num_threads = 20;
+    pthread_t threads[701];
+    int num_threads = 700;
 
     printf("Starting %d client threads...\n", num_threads);
 
