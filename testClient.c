@@ -78,7 +78,7 @@ void* send_and_receive(void* arg) {
             printf("[Thread %d] Received: %s\n", i, buffer);
             
             // Delay between operations to avoid overwhelming server
-            usleep(50000); // 50ms
+            // usleep(50000); // 50ms
             
         } else {
             snprintf(message, sizeof(message), "get name%d\n", k);
@@ -120,17 +120,17 @@ void* send_and_receive(void* arg) {
             */
             
             // Delay between operations to avoid overwhelming server
-            usleep(50000); // 50ms
+            // usleep(50000); // 50ms
         }
     }
     
-    close(sockfd);
+    shutdown(sockfd, SHUT_WR);
     pthread_exit(NULL);
 }
 
 int main() {
     pthread_t threads[201];
-    int num_threads = 200; // Test with 5 clients
+    int num_threads = 20; // Test with 5 clients
     
     printf("Starting %d client threads...\n", num_threads);
     
@@ -148,8 +148,7 @@ int main() {
             return EXIT_FAILURE;
         }
         
-        // Stagger thread creation to avoid overwhelming server
-        usleep(100000); // 100ms between thread creations
+         usleep(50000);
     }
     
     for (int i = 0; i < num_threads; i++) {

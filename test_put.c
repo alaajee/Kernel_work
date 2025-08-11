@@ -106,8 +106,8 @@ void* client_operations(void* arg) {
 }
 
 int main() {
-    pthread_t threads[101];
-    int num_threads = 5;
+    pthread_t threads[201];
+    int num_threads = 200;
 
     uint64_t start_time = now_us();
 
