@@ -1,0 +1,21 @@
+Starting 1 client threads...
+[Thread 0] PUT name0 -> alaa0
+[Thread 0] Received: ok
+ | Latency: 308 us
+[Thread 0] PUT name1 -> alaa1
+[Thread 0] Received: ok
+ | Latency: 377 us
+[Thread 0] PUT name2 -> alaa2
+[Thread 0] Received: ok
+ | Latency: 167 us
+[Thread 0] PUT name3 -> alaa3
+[Thread 0] Received: ok
+ | Latency: 335 us
+[Thread 0] PUT name4 -> alaa4
+[Thread 0] Received: ok
+ | Latency: 397 us
+All operations completed.
+Elapsed time: 0.002 seconds
+Throughput: 2175.81 operations per second
+Total operations: 5
+Average latency: 316.80 microseconds (0.317 ms)
