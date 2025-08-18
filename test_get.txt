@@ -1,0 +1,15 @@
+Starting 1 client threads for GET operations...
+Thread 0 connected on socket 3
+[Thread 0] Starting operations on socket 3
+[Thread 0] Sending: get name0
+[Thread 0] Received: 'alaa0ok' | Latency: 267 us
+[Thread 0] Sending: get name1
+[Thread 0] Received: 'alaa1ok' | Latency: 40799 us
+[Thread 0] Sending: get name2
+[Thread 0] Received: 'alaa2ok' | Latency: 41096 us
+[Thread 0] Sending: get name3
+[Thread 0] Received: 'alaa3ok' | Latency: 41406 us
+[Thread 0] Sending: get name4
+[Thread 0] Received: 'alaa4ok' | Latency: 987 us
+[Thread 0] Closing socket 3
+All GET operations completed.
