@@ -12,10 +12,10 @@ kmodule-objs := \
 	bin/SocketHandler.o \
 	bin/Client.o \
 	bin/operation.o \
-	KVS/src/db.o \
-	KVS/src/io.o \
-	KVS/src/bucket.o \
-	KVS/src/bench.o
+	KV/src/db.o \
+	KV/src/io.o \
+	KV/src/bucket.o \
+	KV/src/bench.o
 
 
 
