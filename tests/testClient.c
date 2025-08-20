@@ -41,8 +41,8 @@ void* send_and_receive(void* arg) {
         pthread_exit(NULL);
     }
     
-    // Small delay after connection to let server initialize
-    usleep(10000); // 10ms
+    // // Small delay after connection to let server initialize
+    // usleep(10000); // 10ms
     
     int k = 0;
     bool put = true;
@@ -148,7 +148,7 @@ int main() {
             return EXIT_FAILURE;
         }
         
-         usleep(50000);
+        usleep(50000);
     }
     
     for (int i = 0; i < num_threads; i++) {

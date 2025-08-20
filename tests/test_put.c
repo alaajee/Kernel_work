@@ -60,47 +60,6 @@ void* client_operations(void* arg) {
         printf("[Thread %d] Received: %s | Latency: %lu us\n", i, buffer, latency_time);
     }
 
-    // sleep(1);
-    // // Phase GET
-    // for (k = 0; k < 1; k++) {
-    //     snprintf(message, sizeof(message), "get name%d\n", k);
-    //     printf("[Thread %d] GET name%d\n", i, k);
-        
-    //     start_time = now_us();
-
-    //     if (send(sockfd, message, strlen(message), 0) < 0) {
-    //         perror("send failed");
-    //         close(sockfd);
-    //         return NULL;
-    //     }
-        
-    //     memset(buffer, 0, sizeof(buffer));
-    //     int total = 0;
-    //     while (1) {
-    //         ssize_t recv_bytes = recv(sockfd, buffer + total, sizeof(buffer) - total - 1, 0);
-    //         if (recv_bytes <= 0) {
-    //             perror("recv failed");
-    //             close(sockfd);
-    //             return NULL;
-    //         }
-    //         total += recv_bytes;
-    //         buffer[total] = '\0';
-
-    //         // On a reçu une ligne complète
-    //         if (strchr(buffer, '\n') != NULL) {
-    //             break;
-    //         }
-    //     }
-
-        
-       
-    //     // printf("[Thread %d] Received: %s\n", i, buffer);
-    //     end_time = now_us();
-    //     latency_time = end_time - start_time;
-    //     printf("[Thread %d] Received: %s | Latency: %lu us\n", i, buffer, latency_time);
-    // }
-
-    // close(sockfd);
     shutdown(sockfd, SHUT_WR);
     return NULL;
 }
@@ -147,8 +106,6 @@ int main() {
             close(sockfd);
         }
         
-
-        // usleep(10000); // Délai entre création de threads
     }
 
     // Attente des threads

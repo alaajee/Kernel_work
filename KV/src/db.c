@@ -4,7 +4,7 @@
 #include "bucket.h"
 #include "outbuf.h"
 
-#define MAX_DB 30
+#define MAX_DB 700
 static KrDb databases[MAX_DB];
 
 /**
